@@ -1,0 +1,8 @@
+<resources>
+    <string name="app_name">AutoSlideshowApp</string>
+
+    <string name="button_next">Next</string>
+    <string name="button_back">Back</string>
+    <string name="button_start">Start</string>
+    <string name="button_stop">Stop</string>
+</resources>
