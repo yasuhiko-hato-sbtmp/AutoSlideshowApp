@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         );
 
         mCursor = cursor;
+        mCursor.moveToFirst();
     }
 
     private Uri getCurrentContentUri(){
@@ -103,9 +104,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             int fieldIndex = mCursor.getColumnIndex(MediaStore.Images.Media._ID);
             Log.d("getCurrentContentUri", String.valueOf(fieldIndex));
             Long id = mCursor.getLong(fieldIndex);
-            Uri imageUri = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
+            retVal = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
-            Log.d("ANDROID", "URI : " + imageUri.toString());
+            Log.d("ANDROID", "URI : " + retVal.toString());
         }
         return retVal;
     }
