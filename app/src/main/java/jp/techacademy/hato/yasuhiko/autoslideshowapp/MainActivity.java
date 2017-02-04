@@ -102,7 +102,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Uri retVal = null;
         if(mCursor != null){
             int fieldIndex = mCursor.getColumnIndex(MediaStore.Images.Media._ID);
-            Log.d("getCurrentContentUri", String.valueOf(fieldIndex));
             Long id = mCursor.getLong(fieldIndex);
             retVal = ContentUris.withAppendedId(MediaStore.Images.Media.EXTERNAL_CONTENT_URI, id);
 
@@ -122,16 +121,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         return false;
     }
 
+    private void setNextImage(){
+        if(mCursor.moveToNext() == false){
+            mCursor.moveToFirst();
+        }
+        setImageView();
+    }
+
+    private void setPreviousImage(){
+        if(mCursor.moveToPrevious() == false){
+            mCursor.moveToLast();
+        }
+        setImageView();
+    }
 
     @Override
     public void onClick(View v) {
         if(v.getId() == R.id.button_next){
             Log.d("Main", "button_next");
-            mCursor.moveToNext();
-            setImageView();
+            setNextImage();
         }
         else if(v.getId() == R.id.button_back){
             Log.d("Main", "button_back");
+            setPreviousImage();
         }
         else if(v.getId() == R.id.button_start){
             Log.d("Main", "button_start");
