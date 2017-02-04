@@ -5,4 +5,9 @@
     <string name="button_back">Back</string>
     <string name="button_start">Start</string>
     <string name="button_stop">Stop</string>
+
+    <string name="permission_dialog_titile">Request Permission</string>
+    <string name="permission_dialog_message">Give a permission to </string>
+    <string name="permission_dialog_cancel">Cancel</string>
+    <string name="permission_dialog_appinfo">App Info</string>
 </resources>

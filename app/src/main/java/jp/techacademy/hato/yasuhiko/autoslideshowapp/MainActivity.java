@@ -1,6 +1,9 @@
 package jp.techacademy.hato.yasuhiko.autoslideshowapp;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Handler;
@@ -26,7 +29,6 @@ import java.util.TimerTask;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
     private static final int PERMISSIONS_REQUEST_CODE_INIT = 100;
-    private static final int PERMISSIONS_REQUEST_CODE_SHOW = 101;
 
     private Button mNextButton;
     private Button mBackButton;
@@ -56,19 +58,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
 
-        // Android 6.0以降の場合
+        // Marshmallow or more
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            // パーミッションの許可状態を確認する
             if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                // 許可されている
+                // permitted
                 initCursor();
                 setImageView();
             } else {
-                // 許可されていないので許可ダイアログを表示する
+                // not permitted
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE_INIT);
             }
-            // Android 5系以下の場合
-        } else {
+        } else { // KitKat or less
             initCursor();
             setImageView();
         }
@@ -77,7 +77,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onStop(){
         super.onDestroy();
-        mCursor.close();
+        if(mCursor != null) {
+            mCursor.close();
+        }
     }
 
     @Override
@@ -91,12 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
                 else{
                     Log.d("request permission", "denied");
-                    RuntimePermissionUtils.showSettingsDialog(getApplicationContext());
-                }
-                break;
-            case PERMISSIONS_REQUEST_CODE_SHOW:
-                if(grantResults[0] != PackageManager.PERMISSION_GRANTED){
-
+                    (new RuntimePermissionUtils()).showSettingsDialog(this);
                 }
                 break;
             default:
@@ -158,15 +155,29 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
-        // TODO
-        // runtiem permission check
+        // Marshmallow or more
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                // permitted
+               onClickBranch(v);
+            } else {
+                // not permitted
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE_INIT);
+            }
+        } else { // KitKat or less
+            onClickBranch(v);
+        }
+    }
+
+
+    private void onClickBranch(View v){
         if(v.getId() == R.id.button_next){
             Log.d("Main", "button_next");
             if(mTimer == null) {
                 setNextImage();
             }
             else{
-               Toast.makeText(this, "Stop slideshow first.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this, "Stop slideshow first.", Toast.LENGTH_LONG).show();
             }
         }
         else if(v.getId() == R.id.button_back){
