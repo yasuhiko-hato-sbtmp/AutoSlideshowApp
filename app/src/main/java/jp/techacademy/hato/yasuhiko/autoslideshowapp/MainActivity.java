@@ -2,8 +2,8 @@ package jp.techacademy.hato.yasuhiko.autoslideshowapp;
 
 import android.Manifest;
 import android.content.pm.PackageManager;
-import android.media.Image;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.content.ContentResolver;
@@ -15,17 +15,28 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.Toast;
 
+import java.util.Timer;
+import java.util.TimerTask;
 
+/**
+ * @author hatoy37
+ */
 public class MainActivity extends AppCompatActivity implements View.OnClickListener{
 
-    private static final int PERMISSIONS_REQUEST_CODE = 100;
+    private static final int PERMISSIONS_REQUEST_CODE_INIT = 100;
+    private static final int PERMISSIONS_REQUEST_CODE_SHOW = 101;
 
     private Button mNextButton;
     private Button mBackButton;
     private Button mStartButton;
     private ImageView mImageView;
     private Cursor mCursor;
+
+    Timer mTimer;
+    Handler mHandler = new Handler();
+    private int SLIDESHOW_INTERVAL_MSEC = 2000;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,6 +50,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         mBackButton.setOnClickListener(this);
         mStartButton.setOnClickListener(this);
         mImageView = (ImageView)findViewById(R.id.imageView);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
 
         // Android 6.0以降の場合
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -49,7 +65,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 setImageView();
             } else {
                 // 許可されていないので許可ダイアログを表示する
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE);
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE_INIT);
             }
             // Android 5系以下の場合
         } else {
@@ -58,9 +74,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
-
     @Override
-    public void onDestroy(){
+    public void onStop(){
         super.onDestroy();
         mCursor.close();
     }
@@ -68,14 +83,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
         switch (requestCode) {
-            case PERMISSIONS_REQUEST_CODE:
+            case PERMISSIONS_REQUEST_CODE_INIT:
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("request permission", "permitted");
                     initCursor();
                     setImageView();
                 }
                 else{
-                    // TODO
-                    // grantされなかったら設定アプリを起動してgrantしてもらう、か、終了
+                    Log.d("request permission", "denied");
+                    RuntimePermissionUtils.showSettingsDialog(getApplicationContext());
+                }
+                break;
+            case PERMISSIONS_REQUEST_CODE_SHOW:
+                if(grantResults[0] != PackageManager.PERMISSION_GRANTED){
+
                 }
                 break;
             default:
@@ -137,17 +158,56 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View v) {
+        // TODO
+        // runtiem permission check
         if(v.getId() == R.id.button_next){
             Log.d("Main", "button_next");
-            setNextImage();
+            if(mTimer == null) {
+                setNextImage();
+            }
+            else{
+               Toast.makeText(this, "Stop slideshow first.", Toast.LENGTH_LONG).show();
+            }
         }
         else if(v.getId() == R.id.button_back){
             Log.d("Main", "button_back");
-            setPreviousImage();
+            if(mTimer == null) {
+                setPreviousImage();
+            }
+            else{
+                Toast.makeText(this, "Stop slideshow first.", Toast.LENGTH_LONG).show();
+            }
         }
         else if(v.getId() == R.id.button_start){
             Log.d("Main", "button_start");
+            if(mTimer == null) {
+                Log.d("Main", "Slideshow start");
+                mStartButton.setText(R.string.button_stop);
+                mNextButton.setText("");
+                mBackButton.setText("");
+                mTimer = new Timer();
+                mTimer.schedule(new TimerTask() {
+                    @Override
+                    public void run() {
+                        mHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                setNextImage();
+                            }
+                        });
+                    }
+                }, SLIDESHOW_INTERVAL_MSEC, SLIDESHOW_INTERVAL_MSEC);
+            }
+            else{
+                Log.d("Main", "Slideshow stop");
+                mStartButton.setText(R.string.button_start);
+                mNextButton.setText(R.string.button_next);
+                mBackButton.setText(R.string.button_back);
+                mTimer.cancel();
+                mTimer = null;
+            }
         }
 
     }
+
 }
