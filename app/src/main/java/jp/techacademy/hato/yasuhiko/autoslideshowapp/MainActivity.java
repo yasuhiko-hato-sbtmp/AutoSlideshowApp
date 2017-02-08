@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // not permitted
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE_INIT);
             }
-        } else { // KitKat or less
+        } else { // Lollipop or less
             initCursor();
             setImageView();
         }
@@ -164,7 +164,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 // not permitted
                 requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSIONS_REQUEST_CODE_INIT);
             }
-        } else { // KitKat or less
+        } else { // Lollipop or less
             onClickBranch(v);
         }
     }
