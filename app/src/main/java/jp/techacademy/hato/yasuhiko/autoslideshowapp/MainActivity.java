@@ -76,7 +76,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onStop(){
-        super.onDestroy();
+        super.onStop();
         if(mCursor != null) {
             mCursor.close();
         }
